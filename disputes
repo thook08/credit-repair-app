@@ -1,0 +1,90 @@
+import { useState } from 'react';
+import { Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+
+export default function DisputeScreen() {
+  const [creditor, setCreditor] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [reason, setReason] = useState('');
+  const [generatedLetter, setGeneratedLetter] = useState('');
+
+  const handleGenerateLetter = async () => {
+    try {
+      const response = await fetch('http://192.168.1.246:5000/generate-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creditor, accountNumber, reason }),
+      });
+
+      const data = await response.json();
+      setGeneratedLetter(data.letter);
+    } catch (error) {
+      console.error('Error generating letter:', error);
+      setGeneratedLetter('Failed to generate letter.');
+    }
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.heading}>Start Your Dispute</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Creditor Name"
+        value={creditor}
+        onChangeText={setCreditor}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Account Number"
+        value={accountNumber}
+        onChangeText={setAccountNumber}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Reason for Dispute"
+        value={reason}
+        onChangeText={setReason}
+      />
+
+      <Button title="Generate Letter" onPress={handleGenerateLetter} />
+
+      {generatedLetter ? (
+        <View style={styles.letterContainer}>
+          <Text style={styles.letterHeading}>Generated Letter:</Text>
+          <Text style={styles.letter}>{generatedLetter}</Text>
+        </View>
+      ) : null}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  heading: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  letterContainer: {
+    marginTop: 20,
+  },
+  letterHeading: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  letter: {
+    fontSize: 16,
+  },
+});
