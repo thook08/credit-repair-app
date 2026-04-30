@@ -1,0 +1,153 @@
+import { useState } from 'react';
+import { AsyncStorage, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+
+export default function LoginScreen({ navigation }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [message, setMessage] = useState('');
+
+    const handleLogin = async () => {
+        try {
+            const response = await fetch('http://192.168.1.246:5000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setMessage('Login successful');
+
+                // Save token to local storage
+                await AsyncStorage.setItem('token', data.token);
+
+                // Navigate to dashboard
+                navigation.navigate('DashboardScreen');
+            } else {
+                setMessage(data.message || 'Login failed');
+            }
+        } catch (error) {
+            setMessage('Error connecting to backend');
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                style={styles.input}
+            />
+
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={styles.input}
+            />
+
+            <Button title="Login" onPress={handleLogin} />
+
+            {message ? <Text style={styles.message}>{message}</Text> : null}
+
+            <Button title="Go to Register" onPress={() => navigation.navigate('RegisterScreen')} />
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: { flex: 1, justifyContent: 'center', padding: 16 },
+    label: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
+    input: { borderWidth: 1, borderColor: '#000', padding: 8, marginBottom: 16 },
+    message: { marginTop: 16, textAlign: 'center', color: 'red' },
+});
+import { useState } from 'react';
+import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+
+export default function RegisterScreen({ navigation }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [message, setMessage] = useState('');
+
+    const handleRegister = async () => {
+        try {
+            const response = await fetch('http://192.168.1.246:5000/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setMessage('Registration successful!');
+                // Optionally navigate to Login screen after success
+                navigation.navigate('Login');
+            } else {
+                setMessage(data.message || 'Registration failed');
+            }
+        } catch (error) {
+            setMessage('Error connecting to backend');
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                style={styles.input}
+            />
+
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={styles.input}
+            />
+
+            <Button title="Register" onPress={handleRegister} />
+            {message ? <Text style={styles.message}>{message}</Text> : null}
+
+            <Button title="Login" onPress={() => navigation.navigate('Login')} />
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: { flex: 1, justifyContent: 'center', padding: 16 },
+    label: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
+    input: { borderWidth: 1, borderColor: '#000', padding: 8, marginBottom: 16 },
+    message: { marginTop: 16, textAlign: 'center', color: 'red' },
+});
+import React from 'react';
+import { Text, View } from 'react-native';
+
+export default function DashboardScreen() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>This is the Dashboard</Text>
+    </View>
+  );
+}
+import React from 'react';
+import { Button, Text, View } from 'react-native';
+
+export default function HomeScreen({ navigation }) {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Welcome to Humble Credit Solutions</Text>
+      <Text>Rebuild. Restore. Rise.</Text>
+      <Button title="Go to Login" onPress={() => navigation.navigate('LoginScreen')} />
+    </View>
+  );
+}
